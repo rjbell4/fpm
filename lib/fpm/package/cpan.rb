@@ -98,6 +98,9 @@ class FPM::Package::CPAN < FPM::Package
                    :name => metadata["name"])
       self.name = fix_name(metadata["name"])
     end
+    metadata["module"].each do |m|
+      self.provides << fix_cap_name(m["name"]) + " = " + self.version
+    end
 
     # author is not always set or it may be a string instead of an array
     self.vendor = case metadata["author"]
@@ -155,11 +158,7 @@ class FPM::Package::CPAN < FPM::Package
           end
           dep = search(dep_name)
 
-          if dep.include?("distribution")
-            name = fix_name(dep["distribution"])
-          else
-            name = fix_name(dep_name)
-          end
+          name = fix_cap_name(dep_name)
 
           if version.to_s == "0"
             # Assume 'Foo = 0' means any version?
@@ -378,6 +377,13 @@ class FPM::Package::CPAN < FPM::Package
     metadata = JSON.parse(data)
     return metadata
   end # def metadata
+
+  def fix_cap_name(name)
+    case name
+      when "perl"; return "perl"
+      else; return (attributes[:cpan_package_name_prefix] + "(" + name + ")").gsub("-", "::")
+    end
+  end # def fix_name
 
   def fix_name(name)
     case name
