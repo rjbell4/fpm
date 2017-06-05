@@ -175,7 +175,7 @@ class FPM::Package::CPAN < FPM::Package
                 if v =~ /\s*[><=]/
                   self.dependencies << "#{name} #{v}"
                 else
-                  self.dependencies << "#{name} = #{v}"
+                  self.dependencies << "#{name} >= #{v}"
                 end
               end
             else
